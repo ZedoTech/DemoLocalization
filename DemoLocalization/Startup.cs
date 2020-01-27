@@ -2,6 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using DemoLocalization.Extensions;
+using DemoLocalization.Middlewares;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
@@ -24,6 +26,15 @@ namespace DemoLocalization
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllersWithViews();
+
+            services.ConfigureRequestLocalization();
+            services.AddLocalization(); // 註冊Localization
+            services.AddControllersWithViews()
+                .AddViewLocalization() // 在View裡使用Localization
+                .AddDataAnnotationsLocalization(options => { // 設定Model的Annotations Localization
+                    options.DataAnnotationLocalizerProvider = (type, factory) =>
+                    factory.Create(typeof(Resources.SharedResource));
+                });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -50,7 +61,7 @@ namespace DemoLocalization
             {
                 endpoints.MapControllerRoute(
                     name: "default",
-                    pattern: "{controller=Home}/{action=Index}/{id?}");
+                    pattern: "{culture=zh-TW}/{controller=Home}/{action=Index}/{id?}"); // 新增culture的路由，判斷多國語系
             });
         }
     }
